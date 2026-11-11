@@ -1,0 +1,33 @@
+name: Build SilverDesser VST3
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-2022
+
+    steps:
+      - name: Baixar o codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar (CMake + Visual Studio 2022)
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+
+      - name: Compilar (Release)
+        run: cmake --build build --config Release --target SilverDesser_VST3 --parallel
+
+      - name: Separar o plugin
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Copy-Item -Recurse -Force "build/SilverDesser_artefacts/Release/VST3/SilverDesser.vst3" "dist/SilverDesser.vst3"
+          Get-ChildItem -Recurse dist | Select-Object FullName
+
+      - name: Enviar o VST3 compilado
+        uses: actions/upload-artifact@v4
+        with:
+          name: SilverDesser-VST3-Windows
+          path: dist
