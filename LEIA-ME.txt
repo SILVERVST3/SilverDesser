@@ -1,0 +1,41 @@
+SilverDesser  -  de-esser / EQ dinamico VST3 (inspirado no Sonnox Oxford SuprEsser)
+==================================================================================
+
+COMO COMPILAR NO GITHUB
+1) Suba para o repositorio (pelo site, "Add file > Upload files") estes itens:
+      CMakeLists.txt
+      Source/   (a pasta inteira, com os 8 arquivos dentro)
+2) O workflow e um arquivo "escondido" (pasta .github), entao crie assim:
+      Add file > Create new file
+      no campo do nome digite:   .github/workflows/build.yml
+      (ao digitar as barras o GitHub cria as pastas sozinho)
+      cole dentro todo o conteudo do arquivo  workflow/build.yml  deste pacote
+      e clique em "Commit changes".
+   O workflow ja esta com  runs-on: windows-2022.
+3) Aba "Actions" > "Build SilverDesser VST3" > quando ficar verde, abra a execucao
+   e baixe o artefato "SilverDesser-VST3-Windows". Dentro vem a pasta SilverDesser.vst3.
+4) Copie a pasta SilverDesser.vst3 para:   C:\Program Files\Common Files\VST3
+   e no REAPER: Preferences > Plug-ins > VST > Re-scan.
+
+CONTROLES (iguais ao SuprEsser)
+  INPUT / OUTPUT  medidores + Trim (entrada +-12 dB, saida 0 a -12 dB)
+  LISTEN          MIX / INSIDE / OUTSIDE
+  FILTERS         Width (0.2 a 10 oitavas), Slope/Q (12 a 72 dB/oit), Frequency (20 Hz a 20 kHz)
+  DISPLAY         arraste a banda (frequencia), as bordas (largura) e a linha Threshold;
+                  roda do mouse = largura; barra de baixo = frequencia; lupa = zoom horizontal;
+                  fader da direita = threshold; Alt/Cmd-clique = valor padrao
+  DYNAMICS        Reduction, Ratio em graus (45 = 1:1, 0 = limitador, negativo = "cut"),
+                  Make-up, Wet/Dry, Soft-Knee (0/5/10/15/20 dB)
+  EFFECT IN       liga/desliga o processamento (sem estalo)
+  ADVANCED        Effect Mode (Trigger BAND/WIDE e Audio BAND/WIDE), Reaction Envelope
+                  (Attack, Hold, Release), Level Tracking (Auto + Damping)
+  A / B           dois ajustes para comparar
+  Duplo-clique numa caixa de valor para digitar (ex.: 7.5k).
+
+LATENCIA
+  O plugin usa filtros FIR de fase linear (como o original) e informa a latencia ao host:
+  1248 amostras a 48 kHz (~26 ms). O REAPER compensa sozinho.
+
+VISUAL
+  Todas as cores ficam em  Source/SilverTheme.h  - se quiser igualar a paleta exata dos
+  seus outros plugins SILVER, e so trocar os valores la.
