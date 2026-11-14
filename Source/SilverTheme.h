@@ -10,35 +10,35 @@ namespace theme
     using juce::Colour;
 
     // janela / paineis
-    inline const Colour bgTop        { 0xffe9ecf1 };
-    inline const Colour bgBottom     { 0xffc4cad3 };
-    inline const Colour panelTop     { 0xffdfe3e8 };
-    inline const Colour panelBottom  { 0xffb9bfc9 };
-    inline const Colour panelBorder  { 0xff8a93a1 };
-    inline const Colour headerTop    { 0xffcfd4db };
-    inline const Colour headerBottom { 0xffaab1bc };
+    inline const Colour bgTop        { 0xfff2f5fa };
+    inline const Colour bgBottom     { 0xffd9e1ec };
+    inline const Colour panelTop     { 0xfffafcff };
+    inline const Colour panelBottom  { 0xffe5ebf3 };
+    inline const Colour panelBorder  { 0xffafbdcf };
+    inline const Colour headerTop    { 0xfff8faff };
+    inline const Colour headerBottom { 0xffdee6f0 };
 
     // textos (azul-marinho)
-    inline const Colour navy         { 0xff14284b };
-    inline const Colour navyDim      { 0xff44587c };
+    inline const Colour navy         { 0xff1b3049 };
+    inline const Colour navyDim      { 0xff526780 };
     inline const Colour white        { 0xffffffff };
 
     // caixas de valor
-    inline const Colour boxBg        { 0xfff5f7fa };
-    inline const Colour boxBorder    { 0xff7f8aa0 };
+    inline const Colour boxBg        { 0xffffffff };
+    inline const Colour boxBorder    { 0xff9cacc2 };
 
     // display
-    inline const Colour dispTop      { 0xfff1f3f7 };
-    inline const Colour dispBottom   { 0xffd9dfe8 };
+    inline const Colour dispTop      { 0xfff8fbff };
+    inline const Colour dispBottom   { 0xffeaf0f8 };
     inline const Colour stripBg      { 0xffe2e7ee };
     inline const Colour gridLine     { 0xffb4bdcb };
     inline const Colour gridText     { 0xff2c4068 };
-    inline const Colour spectrumFill { 0xff6784b8 };
-    inline const Colour spectrumLine { 0xff35548c };
-    inline const Colour sideFill     { 0xffd0245f };   // sidechain / banda
-    inline const Colour bandLine     { 0xff0a8ca6 };   // bordas da banda e threshold
-    inline const Colour threshold    { 0xff008aa6 };
-    inline const Colour thresholdEff { 0xff14284b };
+    inline const Colour spectrumFill { 0xff7b9fc5 };
+    inline const Colour spectrumLine { 0xff436e9e };
+    inline const Colour sideFill     { 0xffbb517c };   // sidechain / banda
+    inline const Colour bandLine     { 0xff008d9c };   // bordas da banda e threshold
+    inline const Colour threshold    { 0xff008d9c };
+    inline const Colour thresholdEff { 0xff1b3049 };
     inline const Colour marker       { 0xffe07b00 };   // setas laranja
     inline const Colour reduction    { 0xffd6204b };
 
@@ -58,11 +58,11 @@ namespace theme
     inline void drawPanel (juce::Graphics& g, juce::Rectangle<float> r, const juce::String& title = {})
     {
         g.setGradientFill (juce::ColourGradient (panelTop, r.getX(), r.getY(), panelBottom, r.getX(), r.getBottom(), false));
-        g.fillRoundedRectangle (r, 5.0f);
+        g.fillRoundedRectangle (r, 9.0f);
         g.setColour (juce::Colours::white.withAlpha (0.55f));
-        g.drawRoundedRectangle (r.reduced (1.0f), 4.0f, 1.0f);
+        g.drawRoundedRectangle (r.reduced (1.0f), 8.0f, 1.0f);
         g.setColour (panelBorder);
-        g.drawRoundedRectangle (r, 5.0f, 1.0f);
+        g.drawRoundedRectangle (r, 9.0f, 1.0f);
 
         if (title.isNotEmpty())
         {

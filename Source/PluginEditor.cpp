@@ -68,6 +68,13 @@ SilverDesserEditor::SilverDesserEditor (SilverDesserProcessor& p)
              &listenMix, &listenInside, &listenOutside, &abA, &abB, &advBar })
         canvas.addAndMakeVisible (c);
 
+    freq.setTooltip ("Centre frequency of the selected band. Double-click to type.");
+    width.setTooltip ("Bandwidth in octaves.");
+    slope.setTooltip ("Filter slope in dB per octave; this is not a Q control.");
+    wet.setTooltip ("Blend compression with the uncompressed signal.");
+    autoTrack.setTooltip ("Follow programme level automatically; threshold becomes relative.");
+    effectIn.setTooltip ("Enable processing with a short crossfade; latency is retained.");
+
     // Listen (radio)
     listenMix.icon = PushBtn::Icon::Mix;
     listenInside.icon = PushBtn::Icon::Inside;
@@ -220,7 +227,7 @@ void SilverDesserEditor::paintCanvas (Graphics& g)
         Font t = theme::font (22.0f, true);
         t.setExtraKerningFactor (0.14f);
         g.setFont (t);
-        g.drawText ("SILVER DESSER", Rectangle<float> (300.0f, 0.0f, 656.0f, 32.0f), Justification::centred, false);
+        g.drawText ("SILVER DEESSER", Rectangle<float> (300.0f, 0.0f, 656.0f, 32.0f), Justification::centred, false);
 
         g.setColour (theme::navyDim);
         g.setFont (theme::font (13.0f, true));
@@ -244,7 +251,7 @@ void SilverDesserEditor::paintCanvas (Graphics& g)
     drawLabel (g, "OUTSIDE", { 104.0f, 238.0f, 108.0f, 20.0f }, 14.0f);
 
     drawLabel (g, "WIDTH",     { 104.0f, 377.0f, 108.0f, 20.0f }, 14.0f);
-    drawLabel (g, "SLOPE/Q",   { 104.0f, 445.0f, 108.0f, 20.0f }, 14.0f);
+    drawLabel (g, "SLOPE",   { 104.0f, 445.0f, 108.0f, 20.0f }, 14.0f);
     drawLabel (g, "FREQUENCY", { 104.0f, 513.0f, 108.0f, 20.0f }, 14.0f);
 
     drawLabel (g, "REDUCTION", { 940.0f, 76.0f, 100.0f, 20.0f }, 13.0f);

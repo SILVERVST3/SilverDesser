@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <algorithm>
 #include <atomic>
+#include <array>
 
 namespace silver
 {
@@ -271,7 +272,7 @@ public:
         const bool hfCut = fHi >= 20000.0;    // borda superior em 20 kHz => HF-Cut
 
         const int half = N / 2;
-        std::vector<double> A ((size_t) half + 1);
+        // Two passes avoid heap allocation when automating the filter.
         double peak = 0.0;
 
         auto sig = [] (double x)
@@ -291,15 +292,17 @@ public:
             if (! hfCut && f > 0.0)
                 lp = sig (-slopeDb * std::log2 (f / fHi) / 20.0);
 
-            A[(size_t) k] = hp * lp;
-            peak = std::max (peak, A[(size_t) k]);
+            peak = std::max (peak, hp * lp);
         }
 
         const double norm = (peak > 1.0e-4) ? std::min (8.0, 1.0 / peak) : 1.0;
 
         for (int k = 0; k <= half; ++k)
         {
-            const double a = A[(size_t) k] * norm;
+            const double f = (double) k * fs / (double) N;
+            const double hp = lfCut ? 1.0 : ((f <= 0.0) ? 0.0 : sig (slopeDb * std::log2 (f / fLo) / 20.0));
+            const double lp = (hfCut || f <= 0.0) ? 1.0 : sig (-slopeDb * std::log2 (f / fHi) / 20.0);
+            const double a = hp * lp * norm;
             spec[(size_t) k] = { a, 0.0 };
             if (k > 0 && k < half)
                 spec[(size_t) (N - k)] = { a, 0.0 };
@@ -466,8 +469,8 @@ public:
             bpLine[c].prepare (lookahead + 8);
         }
 
-        scopeIn.assign ((size_t) kScopeSize, 0.0f);
-        scopeBp.assign ((size_t) kScopeSize, 0.0f);
+        for (auto& v : scopeIn) v.store (0.0f);
+        for (auto& v : scopeBp) v.store (0.0f);
         scopePos.store (0);
 
         smoothA = 1.0 - std::exp (-1.0 / (0.005 * fs));
@@ -481,6 +484,7 @@ public:
         for (int c = 0; c < 2; ++c) { dry[c].reset(); bpLine[c].reset(); pDet[c] = 0.0; pTrk[c] = 0.0; }
         grS = 0.0; holdCount = 0;
         trackDb = -60.0; trackerInit = false; belowCount = 0;
+        wetS = params.wet; makeupS = dbToGainD (params.makeupDb);
         inG = dbToGain (params.inTrimDb);
         outG = dbToGain (params.outTrimDb);
         eMix = params.effectIn ? 1.0f : 0.0f;
@@ -532,6 +536,7 @@ public:
 
         if (force)
         {
+            wetS = p.wet; makeupS = makeupLin;
             inG = inGt; outG = outGt; eMix = eMixT;
             rW = rWt; bW = bWt; wideMix = wideMixT;
         }
@@ -542,7 +547,8 @@ public:
     {
         const int nc = std::min (numChannels, numCh);
 
-        samplesSinceDesign += numSamples;
+        if (nc <= 0 || numSamples <= 0) return;
+        samplesSinceDesign = std::min (samplesSinceDesign, 128) + std::min (numSamples, 128);
         if (bandDirty && samplesSinceDesign >= 128)
         {
             splitter.setBand (params.freq, params.width, params.slopeDb);
@@ -556,7 +562,7 @@ public:
         const double knee = (double) params.kneeDb;
         const bool autoT = params.autoTrack;
         const bool trigWide = params.trigWide;
-        const float wet = params.wet;
+
         const int D = dryDelayTap;
         const int L = lookahead;
 
@@ -564,6 +570,8 @@ public:
 
         for (int i = 0; i < numSamples; ++i)
         {
+            wetS += (params.wet - wetS) * (float) smoothA;
+            makeupS += (makeupLin - makeupS) * smoothA;
             inG   += (inGt  - inG)  * (float) smoothA;
             outG  += (outGt - outG) * (float) smoothA;
             eMix  += (eMixT - eMix) * (float) smoothA;
@@ -640,8 +648,8 @@ public:
                 grS += (gr - grS) * relA;
             }
 
-            const float gLin = (float) (std::pow (10.0, -grS * 0.05) * makeupLin);
-            const float gEff = 1.0f + wet * (gLin - 1.0f);
+            const float gLin = (float) (std::pow (10.0, -grS * 0.05) * makeupS);
+            const float gEff = 1.0f + wetS * (gLin - 1.0f);
             grMax = std::max (grMax, (float) grS);
 
             // ---------------- montagem da saida ----------------
@@ -668,8 +676,8 @@ public:
             }
 
             const int sp = scopePos.load (std::memory_order_relaxed);
-            scopeIn[(size_t) sp] = mono / (float) nc;
-            scopeBp[(size_t) sp] = monoBp / (float) nc;
+            scopeIn[(size_t) sp].store (mono / (float) nc, std::memory_order_relaxed);
+            scopeBp[(size_t) sp].store (monoBp / (float) nc, std::memory_order_relaxed);
             scopePos.store ((sp + 1) & (kScopeSize - 1), std::memory_order_release);
         }
 
@@ -688,11 +696,12 @@ public:
     // buffers de osciloscopio para o analisador espectral
     int copyScope (bool bandpass, float* dst, int num) const
     {
+        num = std::max (0, std::min (num, kScopeSize));
         const auto& src = bandpass ? scopeBp : scopeIn;
         int p = scopePos.load (std::memory_order_acquire);
         int start = (p - num + kScopeSize * 2) & (kScopeSize - 1);
         for (int i = 0; i < num; ++i)
-            dst[i] = src[(size_t) ((start + i) & (kScopeSize - 1))];
+            dst[i] = src[(size_t) ((start + i) & (kScopeSize - 1))].load (std::memory_order_relaxed);
         return num;
     }
 
@@ -775,7 +784,10 @@ private:
 
     float lastPeakIn = 0.0f, lastPeakOut = 0.0f, lastGrDb = 0.0f, lastThreshEff = -18.0f;
 
-    std::vector<float> scopeIn, scopeBp;
+    static_assert (std::atomic<float>::is_always_lock_free, "Scope requires lock-free floats");
+    std::array<std::atomic<float>, kScopeSize> scopeIn {}, scopeBp {};
+    float wetS = 1.0f;
+    double makeupS = 1.0;
     std::atomic<int> scopePos { 0 };
 };
 

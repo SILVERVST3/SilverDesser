@@ -17,7 +17,7 @@ COMO COMPILAR NO GITHUB
 4) Copie a pasta SilverDesser.vst3 para:   C:\Program Files\Common Files\VST3
    e no REAPER: Preferences > Plug-ins > VST > Re-scan.
 
-CONTROLES (iguais ao SuprEsser)
+CONTROLES (inspirados no SuprEsser; equivalência sonora não verificada)
   INPUT / OUTPUT  medidores + Trim (entrada +-12 dB, saida 0 a -12 dB)
   LISTEN          MIX / INSIDE / OUTSIDE
   FILTERS         Width (0.2 a 10 oitavas), Slope/Q (12 a 72 dB/oit), Frequency (20 Hz a 20 kHz)
@@ -39,3 +39,5 @@ LATENCIA
 VISUAL
   Todas as cores ficam em  Source/SilverTheme.h  - se quiser igualar a paleta exata dos
   seus outros plugins SILVER, e so trocar os valores la.
+
+REVISAO: consulte ANALISE_E_VALIDACAO.md para alterações, testes e limitações.

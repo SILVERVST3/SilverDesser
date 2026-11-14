@@ -45,6 +45,7 @@ private:
     SilverDesserProcessor& proc;
     bool advanced = true;
 
+    juce::TooltipWindow tooltipWindow { this, 650 };
     Canvas canvas;
 
     SpectrumDisplay display;

@@ -6,7 +6,7 @@
 //==============================================================================
 //  Caixa de valor: arrasta (vertical), duplo-clique para digitar, Alt/Cmd-clique = padrao
 //==============================================================================
-class ValueBox : public juce::Component
+class ValueBox : public juce::Component, public juce::SettableTooltipClient
 {
 public:
     ValueBox (juce::RangedAudioParameter& p, float dragPixels = 240.0f, bool allowTyping = true)
@@ -109,7 +109,7 @@ private:
 //==============================================================================
 //  Botao (texto ou icone). Estado "on" pintado de verde ou azul-prata.
 //==============================================================================
-class PushBtn : public juce::Component
+class PushBtn : public juce::Component, public juce::SettableTooltipClient
 {
 public:
     enum class Icon { None, Mix, Inside, Outside };
